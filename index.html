@@ -59,7 +59,8 @@
 <script>
 async function pobierzDane(id) {
     try {
-        const apiUrl = "https://danepubliczne.imgw.pl/api/data/hydro/id/" + id + "/format/json";
+        const apiUrl = "https://imgw-proxy.twoja-nazwa.workers.dev/" + id;
+
         const proxyUrl = "https://api.allorigins.win/raw?url=" + encodeURIComponent(apiUrl);
 
         const response = await fetch(proxyUrl);
