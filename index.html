@@ -58,12 +58,10 @@
 <script>
 async function pobierzDane(id) {
     try {
-        const apiUrl = "https://danepubliczne.imgw.pl/api/data/hydro/id/" + id + "/format/json";
-        const proxyUrl = "https://api.allorigins.win/get?url=" + encodeURIComponent(apiUrl);
+        const url = "https://danepubliczne.imgw.pl/api/data/hydro/id/" + id + "/format/json";
 
-        const response = await fetch(proxyUrl);
-        const wrapped = await response.json();
-        const json = JSON.parse(wrapped.contents);
+        const response = await fetch(url);   // <-- tu przeglądarka zablokuje CORS
+        const json = await response.json();
 
         const dane = json[0];
 
@@ -80,7 +78,7 @@ async function pobierzDane(id) {
         document.getElementById("dane").innerHTML = html;
 
     } catch (e) {
-        document.getElementById("dane").innerHTML = "Błąd pobierania danych.";
+        document.getElementById("dane").innerHTML = "Błąd pobierania danych (CORS).";
     }
 }
 
@@ -88,7 +86,7 @@ document.getElementById("wybor").addEventListener("change", function() {
     pobierzDane(this.value);
 });
 
-// Ładowanie domyślnej stacji
+// Domyślna stacja
 pobierzDane("154180140");
 </script>
 
