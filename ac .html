@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <title>Dane hydrologiczne IMGW</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #eef2f5;
+            padding: 40px;
+        }
+        #dane {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            max-width: 700px;
+        }
+        .pole {
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+        .nazwa {
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<h2>Dane hydrologiczne IMGW – Gdańsk Port Północny</h2>
+<div id="dane">Ładowanie danych...</div>
+
+<script>
+async function pobierzDane() {
+    try {
+        // Proxy omijające CORS — działa na GitHub Pages
+        const url = "https://api.allorigins.win/raw?url=https://danepubliczne.imgw.pl/api/data/hydro/id/154180140/format/json";
+
+        const response = await fetch(url);
+        const json = await response.json();
+
+        const dane = json[0]; // API zwraca tablicę z jednym obiektem
+
+        let html = "";
+        for (const klucz in dane) {
+            html += `
+                <div class="pole">
+                    <span class="nazwa">${klucz}:</span>
+                    <span>${dane[klucz]}</span>
+                </div>
+            `;
+        }
+
+        document.getElementById("dane").innerHTML = html;
+
+    } catch (e) {
+        document.getElementById("dane").innerHTML = "Błąd pobierania danych.";
+    }
+}
+
+pobierzDane();
+</script>
+
+</body>
+</html>
