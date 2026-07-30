@@ -60,11 +60,10 @@
 async function pobierzDane(id) {
     try {
         const apiUrl = "https://danepubliczne.imgw.pl/api/data/hydro/id/" + id + "/format/json";
-        const proxyUrl = "https://api.allorigins.win/get?url=" + encodeURIComponent(apiUrl);
+        const proxyUrl = "https://api.allorigins.win/raw?url=" + encodeURIComponent(apiUrl);
 
         const response = await fetch(proxyUrl);
-        const wrapped = await response.json();          // { contents: "..." }
-        const json = JSON.parse(wrapped.contents);      // tu dopiero jest prawdziwy JSON z IMGW
+        const json = await response.json();   // <-- tu już jest prawdziwy JSON
 
         const dane = json[0];
 
