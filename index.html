@@ -49,26 +49,23 @@
     <option value="154180020">Szczecin</option>
 </select>
 
-<div id="nadMorzem">powyżej średniego poziomu morza: ...</div>
+<div id="nadMorzem">
+    powyżej średniego poziomu morza: brak danych IMGW do obliczeń
+</div>
 
 <div id="dane">Wybierz wodowskaz...</div>
 
 <script>
 async function pobierzDane(id) {
     try {
-        const url = "https://corsproxy.io/?https://danepubliczne.imgw.pl/api/data/hydro/id/" + id + "/format/json";
-        const response = await fetch(url);
-        const json = await response.json();
+        const apiUrl = "https://danepubliczne.imgw.pl/api/data/hydro/id/" + id + "/format/json";
+        const proxyUrl = "https://api.allorigins.win/get?url=" + encodeURIComponent(apiUrl);
+
+        const response = await fetch(proxyUrl);
+        const wrapped = await response.json();
+        const json = JSON.parse(wrapped.contents);
 
         const dane = json[0];
-
-        // Obliczenie wysokości względem morza
-const stan = parseFloat(dane.stan_wody); // cm
-const zero = parseFloat(dane.rzedna_zerawodowskazu) * 100; // m → cm
-const nadMorzem = stan - zero;
-
-        document.getElementById("nadMorzem").textContent =
-            "powyżej średniego poziomu morza: " + nadMorzem.toFixed(1) + " cm";
 
         let html = "";
         for (const klucz in dane) {
