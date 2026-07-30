@@ -60,10 +60,11 @@
 async function pobierzDane(id) {
     try {
         const apiUrl = "https://danepubliczne.imgw.pl/api/data/hydro/id/" + id + "/format/json";
-        const proxyUrl = "https://thingproxy.freeboard.io/fetch/" + apiUrl;
+        const proxyUrl = "https://api.allorigins.win/get?url=" + encodeURIComponent(apiUrl);
 
         const response = await fetch(proxyUrl);
-        const json = await response.json();
+        const wrapped = await response.json();          // { contents: "..." }
+        const json = JSON.parse(wrapped.contents);      // tu dopiero jest prawdziwy JSON z IMGW
 
         const dane = json[0];
 
@@ -87,6 +88,7 @@ async function pobierzDane(id) {
 
     } catch (e) {
         document.getElementById("dane").innerHTML = "Błąd pobierania danych.";
+        console.error(e);
     }
 }
 
