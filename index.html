@@ -28,8 +28,8 @@
             padding: 8px;
             margin-bottom: 20px;
         }
-        #nadMorzem {
-            font-size: 24px;
+        #infoTop {
+            font-size: 22px;
             font-weight: bold;
             margin-bottom: 20px;
             color: #003366;
@@ -49,8 +49,9 @@
     <option value="154180020">Szczecin</option>
 </select>
 
-<div id="nadMorzem">
-    powyżej średniego poziomu morza: brak danych IMGW do obliczeń
+<div id="infoTop">
+    Stan wodowskazu: ...<br>
+    Rzędna zera wodowskazu: ...
 </div>
 
 <div id="dane">Wybierz wodowskaz...</div>
@@ -66,6 +67,12 @@ async function pobierzDane(id) {
 
         const dane = json[0];
 
+        // GÓRNE INFORMACJE
+        document.getElementById("infoTop").innerHTML =
+            "Stan wodowskazu: " + dane.stan_wody + " cm<br>" +
+            "Rzędna zera wodowskazu: " + dane.rzedna_zerawodowskazu + " m";
+
+        // LISTA WSZYSTKICH PARAMETRÓW
         let html = "";
         for (const klucz in dane) {
             html += `
