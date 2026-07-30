@@ -2,7 +2,7 @@
 <html lang="pl">
 <head>
     <meta charset="UTF-8">
-    <title>Dane hydrologiczne IMGW</title>
+    <title>Wodowskazy Morskie IMGW</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -23,22 +23,53 @@
         .nazwa {
             font-weight: bold;
         }
+        select {
+            font-size: 18px;
+            padding: 8px;
+            margin-bottom: 20px;
+        }
+        #nadMorzem {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #003366;
+        }
     </style>
 </head>
 <body>
 
-<h2>Dane hydrologiczne IMGW – Gdańsk Port Północny</h2>
-<div id="dane">Ładowanie danych...</div>
+<h2>Wodowskazy Morskie IMGW</h2>
+
+<select id="wybor">
+    <option value="154180090">Łeba</option>
+    <option value="154180100">Władysławowo</option>
+    <option value="154180120">Gdynia</option>
+    <option value="154180140">Gdańsk – Port Północny</option>
+    <option value="154180010">Świnoujście</option>
+    <option value="154180020">Szczecin</option>
+</select>
+
+<div id="nadMorzem">powyżej średniego poziomu morza: ...</div>
+
+<div id="dane">Wybierz wodowskaz...</div>
 
 <script>
-async function pobierzDane() {
+async function pobierzDane(id) {
     try {
-        const url = "https://corsproxy.io/?https://danepubliczne.imgw.pl/api/data/hydro/id/154180140/format/json";
-
+        const url = "https://corsproxy.io/?https://danepubliczne.imgw.pl/api/data/hydro/id/" + id + "/format/json";
         const response = await fetch(url);
         const json = await response.json();
 
         const dane = json[0];
+
+        // Obliczenie wysokości względem morza
+        const stan = parseFloat(dane.stan_wody); // cm
+        const zero = parseFloat(dane.rzedna_zerawodowskazu) * 100; // m → cm
+
+        const nadMorzem = stan - zero;
+
+        document.getElementById("nadMorzem").textContent =
+            "powyżej średniego poziomu morza: " + nadMorzem.toFixed(1) + " cm";
 
         let html = "";
         for (const klucz in dane) {
@@ -57,7 +88,12 @@ async function pobierzDane() {
     }
 }
 
-pobierzDane();
+document.getElementById("wybor").addEventListener("change", function() {
+    pobierzDane(this.value);
+});
+
+// Ładowanie domyślnej stacji
+pobierzDane("154180140");
 </script>
 
 </body>
