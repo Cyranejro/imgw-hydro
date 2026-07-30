@@ -33,13 +33,12 @@
 <script>
 async function pobierzDane() {
     try {
-        // Proxy omijające CORS — działa na GitHub Pages
-        const url = "https://api.allorigins.win/raw?url=https://danepubliczne.imgw.pl/api/data/hydro/id/154180140/format/json";
+        const url = "https://corsproxy.io/?https://danepubliczne.imgw.pl/api/data/hydro/id/154180140/format/json";
 
         const response = await fetch(url);
         const json = await response.json();
 
-        const dane = json[0]; // API zwraca tablicę z jednym obiektem
+        const dane = json[0];
 
         let html = "";
         for (const klucz in dane) {
