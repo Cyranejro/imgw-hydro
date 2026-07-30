@@ -63,10 +63,9 @@ async function pobierzDane(id) {
         const dane = json[0];
 
         // Obliczenie wysokości względem morza
-        const stan = parseFloat(dane.stan_wody); // cm
-        const zero = parseFloat(dane.rzedna_zerawodowskazu) * 100; // m → cm
-
-        const nadMorzem = stan - zero;
+const stan = parseFloat(dane.stan_wody); // cm
+const zero = parseFloat(dane.rzedna_zerawodowskazu) * 100; // m → cm
+const nadMorzem = stan - zero;
 
         document.getElementById("nadMorzem").textContent =
             "powyżej średniego poziomu morza: " + nadMorzem.toFixed(1) + " cm";
