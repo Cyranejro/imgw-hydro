@@ -44,7 +44,7 @@
     <option value="154180090">Łeba</option>
     <option value="154180100">Władysławowo</option>
     <option value="154180120">Gdynia</option>
-    <option value="154180140">Gdańsk – Port Północny</option>
+    <option value="154180140" selected>Gdańsk – Port Północny</option>
     <option value="154180010">Świnoujście</option>
     <option value="154180020">Szczecin</option>
 </select>
@@ -54,50 +54,60 @@
     Rzędna zera wodowskazu: ...
 </div>
 
-<div id="dane">Wybierz wodowskaz...</div>
+<div id="dane">Pobieranie danych...</div>
 
 <script>
 async function pobierzDane(id) {
     try {
-        const apiUrl = "https://imgw-proxy.twoja-nazwa.workers.dev/" + id;
+        // Informacja dla użytkownika o ładowaniu
+        document.getElementById("dane").innerHTML = "Pobieranie aktualnych danych...";
+        
+        // Twój działający adres Cloudflare Worker
+        const workerUrl = "https://imgw-hydro.arturcyran1994.workers.dev?id=" + id;
 
-        const proxyUrl = "https://api.allorigins.win/raw?url=" + encodeURIComponent(apiUrl);
+        const response = await fetch(workerUrl);
 
-        const response = await fetch(proxyUrl);
-        const json = await response.json();   // <-- tu już jest prawdziwy JSON
+        if (!response.ok) {
+            throw new Error(`Błąd HTTP: ${response.status}`);
+        }
 
-        const dane = json[0];
+        const dane = await response.json();
 
-        // GÓRNE INFORMACJE
+        // Sprawdzenie czy w odpowiedzi nie ma błędu zwróconego przez Worker
+        if (dane.error) {
+            throw new Error(dane.error);
+        }
+
+        // Górne informacje
         document.getElementById("infoTop").innerHTML =
-            "Stan wodowskazu: " + dane.stan_wody + " cm<br>" +
-            "Rzędna zera wodowskazu: " + dane.rzedna_zerawodowskazu + " m";
+            "Stan wodowskazu: " + (dane.stan_wody !== null && dane.stan_wody !== undefined ? dane.stan_wody + " cm" : "Brak danych") + "<br>" +
+            "Rzędna zera wodowskazu: " + (dane.rzedna_zerawodowskazu !== null && dane.rzedna_zerawodowskazu !== undefined ? dane.rzedna_zerawodowskazu + " m" : "Brak danych");
 
-        // LISTA WSZYSTKICH PARAMETRÓW
+        // Wypełnienie parametrów
         let html = "";
         for (const klucz in dane) {
             html += `
                 <div class="pole">
                     <span class="nazwa">${klucz}:</span>
-                    <span>${dane[klucz]}</span>
+                    <span>${dane[klucz] !== null ? dane[klucz] : 'brak'}</span>
                 </div>
             `;
         }
-
         document.getElementById("dane").innerHTML = html;
 
     } catch (e) {
-        document.getElementById("dane").innerHTML = "Błąd pobierania danych.";
-        console.error(e);
+        document.getElementById("dane").innerHTML = "Błąd pobierania danych: " + e.message;
+        console.error("Szczegóły błędu:", e);
     }
 }
 
+// Nasłuchiwanie zmiany wyboru w menu select
 document.getElementById("wybor").addEventListener("change", function() {
     pobierzDane(this.value);
 });
 
-// Domyślna stacja
-pobierzDane("154180140");
+// Pobranie danych dla domyślnej stacji po załadowaniu strony
+pobierzDane(document.getElementById("wybor").value);
 </script>
 
 </body>
