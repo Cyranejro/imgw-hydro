@@ -2,6 +2,7 @@
 <html lang="pl">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Wodowskazy Morskie IMGW</title>
     <style>
         body {
@@ -34,6 +35,10 @@
             margin-bottom: 20px;
             color: #003366;
         }
+        .error {
+            color: #d9534f;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -54,18 +59,24 @@
     Rzędna zera wodowskazu: ...
 </div>
 
-<div id="dane">Pobieranie danych...</div>
+<div id="dane">Ładowanie danych...</div>
 
 <script>
 async function pobierzDane(id) {
-    try {
-        // Informacja dla użytkownika o ładowaniu
-        document.getElementById("dane").innerHTML = "Pobieranie aktualnych danych...";
-        
-        // Twój działający adres Cloudflare Worker
-        const workerUrl = "https://imgw-hydro.arturcyran1994.workers.dev?id=" + id;
+    const daneElement = document.getElementById("dane");
+    const infoTopElement = document.getElementById("infoTop");
 
+    try {
+        daneElement.innerHTML = "Pobieranie aktualnych danych...";
+
+        const workerUrl = "https://imgw-hydro.arturcyran1994.workers.dev?id=" + id;
         const response = await fetch(workerUrl);
+
+        // Zabezpieczenie: Sprawdzenie, czy odpowiedź serwera to faktycznie JSON
+        const contentType = response.headers.get("content-type");
+        if (!contentType || !contentType.includes("application/json")) {
+            throw new Error("Worker zwrócił kod HTML/tekst zamiast danych JSON. Upewnij się, że opublikowałeś (Deploy) kod w Cloudflare.");
+        }
 
         if (!response.ok) {
             throw new Error(`Błąd HTTP: ${response.status}`);
@@ -73,17 +84,20 @@ async function pobierzDane(id) {
 
         const dane = await response.json();
 
-        // Sprawdzenie czy w odpowiedzi nie ma błędu zwróconego przez Worker
         if (dane.error) {
             throw new Error(dane.error);
         }
 
-        // Górne informacje
-        document.getElementById("infoTop").innerHTML =
-            "Stan wodowskazu: " + (dane.stan_wody !== null && dane.stan_wody !== undefined ? dane.stan_wody + " cm" : "Brak danych") + "<br>" +
-            "Rzędna zera wodowskazu: " + (dane.rzedna_zerawodowskazu !== null && dane.rzedna_zerawodowskazu !== undefined ? dane.rzedna_zerawodowskazu + " m" : "Brak danych");
+        // Górne, podsumowujące informacje
+        const stanWody = (dane.stan_wody !== null && dane.stan_wody !== undefined) ? dane.stan_wody + " cm" : "Brak danych";
+        const rzedna = (dane.rzedna_zerawodowskazu !== null && dane.rzedna_zerawodowskazu !== undefined) ? dane.rzedna_zerawodowskazu + " m" : "Brak danych";
 
-        // Wypełnienie parametrów
+        infoTopElement.innerHTML = `
+            Stan wodowskazu: ${stanWody}<br>
+            Rzędna zera wodowskazu: ${rzedna}
+        `;
+
+        // Generowanie pełnej listy ze wszystkimi parametrami
         let html = "";
         for (const klucz in dane) {
             html += `
@@ -93,20 +107,20 @@ async function pobierzDane(id) {
                 </div>
             `;
         }
-        document.getElementById("dane").innerHTML = html;
+        daneElement.innerHTML = html;
 
     } catch (e) {
-        document.getElementById("dane").innerHTML = "Błąd pobierania danych: " + e.message;
+        daneElement.innerHTML = `<span class="error">Błąd pobierania danych: ${e.message}</span>`;
         console.error("Szczegóły błędu:", e);
     }
 }
 
-// Nasłuchiwanie zmiany wyboru w menu select
+// Nasłuchiwanie na zmianę stacji na liście
 document.getElementById("wybor").addEventListener("change", function() {
     pobierzDane(this.value);
 });
 
-// Pobranie danych dla domyślnej stacji po załadowaniu strony
+// Pobranie danych na start po załadowaniu strony
 pobierzDane(document.getElementById("wybor").value);
 </script>
 
